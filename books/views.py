@@ -1,19 +1,11 @@
-from django.shortcuts import render
-from rest_framework import mixins
 from rest_framework.permissions import AllowAny, IsAdminUser
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from books.models import Book
 from books.serializers import BookSerializer
 
 
-class BookViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    GenericViewSet,
-):
+class BookViewSet(ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
