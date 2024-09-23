@@ -76,3 +76,18 @@ class BorrowingReturnSerializer(serializers.ModelSerializer):
             "user_id",
         )
         model = Borrowing
+
+    def update(self, borrowing, validated_data):
+        if borrowing.actual_return:
+            raise serializers.ValidationError(
+                {"error": "This borrowing has already been returned."}
+            )
+
+        borrowing.actual_return = datetime.today().date()
+
+        book = Book.objects.get(pk=borrowing.book_id)
+        book.inventory += 1
+        book.save()
+
+        borrowing.save()
+        return borrowing
