@@ -29,13 +29,10 @@ class BorrowingReadSerializer(serializers.ModelSerializer):
             return None
 
 
-class BorrowingCreateSerializer(
-    BorrowingReadSerializer,
-    serializers.ModelSerializer,
-):
+class BorrowingCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Borrowing
-        fields = ("expected_return", "book_id")
+        fields = ("id", "borrow_date", "expected_return", "book_id", "user_id")
         read_only_fields = ("user_id",)
 
     def create(self, validated_data):
@@ -48,11 +45,10 @@ class BorrowingCreateSerializer(
 
     def validate(self, data):
         if "borrow_date" not in data or data["borrow_date"] is None:
-            data["borrow_date"] = datetime.now().date()
+            data["borrow_date"] = datetime.today().date()
 
         borrow_date = data["borrow_date"]
         expected_return = data.get("expected_return")
-        actual_return = data.get("actual_return")
 
         if expected_return <= borrow_date:
             raise serializers.ValidationError(
@@ -61,16 +57,22 @@ class BorrowingCreateSerializer(
                 }
             )
 
-        if actual_return and borrow_date:
-            if actual_return <= borrow_date:
-                raise serializers.ValidationError(
-                    {
-                        "actual_return": "Actual return date must be after the borrow date."
-                    }
-                )
-
         book = Book.objects.filter(id=data["book_id"]).first()
         if not book or book.inventory <= 0:
             raise serializers.ValidationError("Book is not available for borrowing.")
 
         return data
+
+
+class BorrowingReturnSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ["id", "book_id", "borrow_date", "expected_return", "actual_return"]
+        read_only_fields = (
+            "id",
+            "borrow_date",
+            "expected_return",
+            "actual_return",
+            "book_id",
+            "user_id",
+        )
+        model = Borrowing
