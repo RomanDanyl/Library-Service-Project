@@ -1,15 +1,19 @@
 from datetime import datetime
 
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from books.models import Book
 from books.serializers import BookSerializer
 from borrowing.models import Borrowing
-from utils.telegram_helpers import send_telegram_message
+from payment.helpers import create_stripe_session
+from payment.models import Payment
+from payment.serializers import PaymentSerializer
 
 
 class BorrowingReadSerializer(serializers.ModelSerializer):
     book_details = serializers.SerializerMethodField()
+    payments = serializers.SerializerMethodField()
 
     class Meta:
         model = Borrowing
@@ -20,6 +24,7 @@ class BorrowingReadSerializer(serializers.ModelSerializer):
             "actual_return",
             "book_details",
             "user_id",
+            "payments",
         )
 
     def get_book_details(self, obj):
@@ -27,6 +32,13 @@ class BorrowingReadSerializer(serializers.ModelSerializer):
             book = Book.objects.get(id=obj.book_id)
             return BookSerializer(book).data
         except Book.DoesNotExist:
+            return None
+
+    def get_payments(self, obj):
+        try:
+            payments = Payment.objects.filter(borrowing_id=obj.id)
+            return PaymentSerializer(payments, many=True).data
+        except Payment.DoesNotExist:
             return None
 
 
@@ -42,6 +54,16 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         book.save()
         validated_data["user_id"] = self.context["request"].user.id
         borrowing = Borrowing.objects.create(**validated_data)
+
+        borrowing_days = (borrowing.expected_return - borrowing.borrow_date).days
+        total_amount = book.daily_fee * borrowing_days
+        total_amount_in_cents = int(total_amount * 100)
+
+        try:
+            create_stripe_session(borrowing, total_amount_in_cents)
+        except Exception as e:
+            raise ValidationError({"error": str(e)})
+
         return borrowing
 
     def validate(self, data):
