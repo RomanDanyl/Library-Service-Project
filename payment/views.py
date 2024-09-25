@@ -8,9 +8,9 @@ from rest_framework.views import APIView
 
 from books.models import Book
 from borrowing.models import Borrowing
-from .helpers import create_stripe_session
-from .models import Payment
-from .serializers import PaymentSerializer
+from utils.stripe_helpers import create_stripe_session
+from payment.models import Payment
+from payment.serializers import PaymentSerializer
 
 
 class PaymentViewSet(ListModelMixin, RetrieveModelMixin, viewsets.GenericViewSet):

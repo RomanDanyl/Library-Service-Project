@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from books.models import Book
 from books.serializers import BookSerializer
 from borrowing.models import Borrowing
-from payment.helpers import create_stripe_session
+from utils.stripe_helpers import create_stripe_session
 from payment.models import Payment
 from payment.serializers import PaymentSerializer
 
@@ -26,6 +26,7 @@ class BorrowingReadSerializer(serializers.ModelSerializer):
             "user_id",
             "payments",
         )
+        read_only_fields = ("user_id",)
 
     def get_book_details(self, obj):
         try:
@@ -57,10 +58,9 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
 
         borrowing_days = (borrowing.expected_return - borrowing.borrow_date).days
         total_amount = book.daily_fee * borrowing_days
-        total_amount_in_cents = int(total_amount * 100)
 
         try:
-            create_stripe_session(borrowing, total_amount_in_cents)
+            create_stripe_session(borrowing, total_amount)
         except Exception as e:
             raise ValidationError({"error": str(e)})
 
