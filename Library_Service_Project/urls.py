@@ -18,11 +18,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-import borrowing
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("books.urls", namespace="books")),
     path("api/", include("borrowing.urls", namespace="borrowings")),
+    path("api/", include("payment.urls", namespace="payments")),
     path("api/user/", include("user.urls", namespace="user")),
 ]
