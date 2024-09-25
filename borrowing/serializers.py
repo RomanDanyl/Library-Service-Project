@@ -5,6 +5,7 @@ from rest_framework import serializers
 from books.models import Book
 from books.serializers import BookSerializer
 from borrowing.models import Borrowing
+from utils.telegram_helpers import send_telegram_message
 
 
 class BorrowingReadSerializer(serializers.ModelSerializer):
