@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_celery_beat",
     "books",
     "borrowing",
     "payment",
@@ -143,3 +146,12 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZE",
 }
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_BEAT_SCHEDULE = {
+    "check-overdue-borrowings-every-day": {
+        "task": "borrowing.tasks.check_overdue_borrowings",
+        "schedule": crontab(hour="0", minute="0"),
+    },
+}
+CELERY_TIMEZONE = "UTC"
