@@ -1,5 +1,7 @@
 import stripe
 from django.conf import settings
+from django.shortcuts import redirect
+from django.urls import reverse
 from rest_framework import viewsets, status
 from rest_framework.mixins import RetrieveModelMixin, ListModelMixin
 from rest_framework.permissions import IsAuthenticated
@@ -39,13 +41,54 @@ class CreateCheckoutSession(APIView):
         borrowing_days = (borrowing.expected_return - borrowing.borrow_date).days
 
         total_amount = book.daily_fee * borrowing_days
-        total_amount_in_cents = int(total_amount * 100)
 
         try:
-            payment = create_stripe_session(borrowing, total_amount_in_cents)
+            payment = create_stripe_session(borrowing, total_amount)
             return Response(
                 {"id": payment.session_id, "url": payment.session_url},
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PaymentSuccessTempView(APIView):
+    def get(self, request):
+        session_id = request.GET.get("session_id")
+        if session_id:
+            return redirect(
+                reverse("payments:payment-success", kwargs={"session_id": session_id})
+            )
+        return Response(
+            {"error": "Session ID not found."}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class PaymentSuccessView(APIView):
+    def get(self, request, session_id):
+        print(session_id)
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+
+            if session.payment_status == "paid":
+                try:
+                    payment = Payment.objects.get(session_id=session_id)
+                    payment.status = Payment.StatusChoices.PAID
+                    payment.save()
+                    return Response({"message": "Payment successful."})
+                except Payment.DoesNotExist:
+                    return Response({"error": "Payment not found."}, status=404)
+            else:
+                return Response({"message": "Payment not completed."}, status=400)
+
+        except stripe.error.StripeError as e:
+            return Response({"stripe_error": str(e)}, status=500)
+        except Exception as e:
+            return Response({"other_error": str(e)}, status=500)
+
+
+class PaymentCancelView(APIView):
+    def get(self, request):
+        return Response(
+            {"message": "Payment was cancelled. You can pay again within 24 hours."}
+        )

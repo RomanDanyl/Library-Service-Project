@@ -60,9 +60,9 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         total_amount = book.daily_fee * borrowing_days
 
         try:
-            create_stripe_session(borrowing, total_amount)
+            create_stripe_session(borrowing, total_amount, self.context["request"])
         except Exception as e:
-            raise ValidationError({"error": str(e)})
+            raise ValidationError({"borrow_error": str(e)})
 
         return borrowing
 

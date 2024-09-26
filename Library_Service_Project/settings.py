@@ -162,5 +162,3 @@ CELERY_TIMEZONE = "UTC"
 
 STRIPE_PUBLISHABLE_KEY = "pk_test_51Q2wgyGRVZqdEvS6t3QA0h8jEt4pYncOCvcjESl1UzVCie3MSlJkmm8oCI2JBMR8HcppxsLxF43hiskcHvZyhxG200U74C7ePe"
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_SUCCESS_URL = "http://localhost:8000/api/payments/"
-STRIPE_CANCEL_URL = "http://localhost:8000/api/payments/"
