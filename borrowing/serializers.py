@@ -11,6 +11,9 @@ from payment.models import Payment
 from payment.serializers import PaymentSerializer
 
 
+FINE_MULTIPLIER = 2
+
+
 class BorrowingReadSerializer(serializers.ModelSerializer):
     book_details = serializers.SerializerMethodField()
     payments = serializers.SerializerMethodField()
@@ -60,7 +63,12 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         total_amount = book.daily_fee * borrowing_days
 
         try:
-            create_stripe_session(borrowing, total_amount, self.context["request"])
+            create_stripe_session(
+                borrowing,
+                total_amount,
+                Payment.TypeChoices.PAYMENT,
+                self.context["request"],
+            )
         except Exception as e:
             raise ValidationError({"borrow_error": str(e)})
 
@@ -113,4 +121,19 @@ class BorrowingReturnSerializer(serializers.ModelSerializer):
         book.save()
 
         borrowing.save()
+
+        if borrowing.is_late():
+            overdue_days = (borrowing.actual_return - borrowing.expected_return).days
+            fine_amount = overdue_days * book.daily_fee * FINE_MULTIPLIER
+
+            try:
+                create_stripe_session(
+                    borrowing,
+                    fine_amount,
+                    Payment.TypeChoices.FINE,
+                    self.context["request"],
+                )
+            except Exception as e:
+                raise ValidationError({"return_borrow_error": str(e)})
+
         return borrowing

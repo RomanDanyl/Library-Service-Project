@@ -43,7 +43,9 @@ class CreateCheckoutSession(APIView):
         total_amount = book.daily_fee * borrowing_days
 
         try:
-            payment = create_stripe_session(borrowing, total_amount)
+            payment = create_stripe_session(
+                borrowing, total_amount, Payment.TypeChoices.PAYMENT, request
+            )
             return Response(
                 {"id": payment.session_id, "url": payment.session_url},
                 status=status.HTTP_200_OK,
@@ -66,7 +68,6 @@ class PaymentSuccessTempView(APIView):
 
 class PaymentSuccessView(APIView):
     def get(self, request, session_id):
-        print(session_id)
         try:
             session = stripe.checkout.Session.retrieve(session_id)
 

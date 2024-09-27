@@ -12,9 +12,15 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def create_stripe_session(
-    borrowing: Borrowing, total_amount: Decimal, request
+    borrowing: Borrowing, total_amount: Decimal, payment_type: str, request
 ) -> Payment:
+
     book = Book.objects.get(id=borrowing.book_id)
+
+    if payment_type == Payment.TypeChoices.FINE:
+        product_name = f"Fine for overdue borrowing of {book.title}"
+    else:
+        product_name = f"Borrowing for {book.title}"
 
     checkout_session = stripe.checkout.Session.create(
         payment_method_types=["card"],
@@ -23,7 +29,7 @@ def create_stripe_session(
                 "price_data": {
                     "currency": "usd",
                     "product_data": {
-                        "name": f"Borrowing for {book.title}",
+                        "name": product_name,
                     },
                     "unit_amount": int(total_amount * 100),
                 },
@@ -38,7 +44,7 @@ def create_stripe_session(
 
     payment = Payment.objects.create(
         status=Payment.StatusChoices.PENDING,
-        type=Payment.TypeChoices.PAYMENT,
+        type=payment_type,
         session_id=checkout_session.id,
         session_url=checkout_session.url,
         borrowing_id=borrowing.id,
