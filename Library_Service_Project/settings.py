@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_spectacular",
     "django_celery_beat",
     "books",
     "borrowing",
@@ -143,6 +144,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -162,3 +164,16 @@ CELERY_TIMEZONE = "UTC"
 
 STRIPE_PUBLISHABLE_KEY = "pk_test_51Q2wgyGRVZqdEvS6t3QA0h8jEt4pYncOCvcjESl1UzVCie3MSlJkmm8oCI2JBMR8HcppxsLxF43hiskcHvZyhxG200U74C7ePe"
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Library Service API",
+    "DESCRIPTION": "Service for library borrowing",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "defaultModelRendering": "model",
+        "defaultModelsExpandDepth": 2,
+        "defaultModelExpandDepth": 2,
+    },
+}
