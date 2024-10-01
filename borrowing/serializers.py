@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional, Dict, List
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -31,14 +32,14 @@ class BorrowingReadSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("user_id",)
 
-    def get_book_details(self, obj):
+    def get_book_details(self, obj: Borrowing) -> Optional[Dict]:
         try:
             book = Book.objects.get(id=obj.book_id)
             return BookSerializer(book).data
         except Book.DoesNotExist:
             return None
 
-    def get_payments(self, obj):
+    def get_payments(self, obj: Borrowing) -> Optional[List]:
         try:
             payments = Payment.objects.filter(borrowing_id=obj.id)
             return PaymentSerializer(payments, many=True).data

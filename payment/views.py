@@ -33,6 +33,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class CreateCheckoutSession(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = PaymentSerializer
 
     def post(self, request, *args, **kwargs):
         borrowing_id = kwargs.get("borrowing_id")
@@ -67,6 +68,8 @@ class PaymentSuccessTempView(APIView):
 
 
 class PaymentSuccessView(APIView):
+    serializer_class = PaymentSerializer
+
     def get(self, request, session_id):
         try:
             session = stripe.checkout.Session.retrieve(session_id)
@@ -89,6 +92,8 @@ class PaymentSuccessView(APIView):
 
 
 class PaymentCancelView(APIView):
+    serializer_class = PaymentSerializer
+
     def get(self, request):
         return Response(
             {"message": "Payment was cancelled. You can pay again within 24 hours."}

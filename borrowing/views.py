@@ -1,3 +1,4 @@
+from drf_spectacular.utils import OpenApiParameter, extend_schema_view, extend_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -11,6 +12,24 @@ from borrowing.serializers import (
 )
 
 
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "is_active",
+                str,
+                description="Filter by active status (true/false)",
+                required=False,
+            ),
+            OpenApiParameter(
+                "user_id",
+                int,
+                description="Filter by user ID (only for staff users)",
+                required=False,
+            ),
+        ]
+    )
+)
 class BorrowingViewSet(viewsets.ModelViewSet):
     queryset = Borrowing.objects.all()
     permission_classes = [IsAuthenticated]
