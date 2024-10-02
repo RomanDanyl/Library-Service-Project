@@ -4,7 +4,6 @@ from django.db import models
 
 
 class Borrowing(models.Model):
-    email = models.CharField(max_length=255)
     borrow_date = models.DateField(auto_now_add=True)
     expected_return = models.DateField()
     actual_return = models.DateField(null=True, blank=True)
