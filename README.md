@@ -25,7 +25,7 @@ Library Service API is a Django-based web application for managing book borrowin
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/YourUsername/library-service.git
+   git clone https://github.com/RomanDanyl/Library-Service-Project.git
    cd library-service
 
 2. **Install dependencies:**
