@@ -50,6 +50,5 @@ def create_stripe_session(
         borrowing_id=borrowing.id,
         money_to_pay=total_amount,
     )
-    print(f"id: {payment.session_id}")
 
     return payment

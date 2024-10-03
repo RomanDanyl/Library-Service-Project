@@ -31,30 +31,6 @@ class PaymentViewSet(ListModelMixin, RetrieveModelMixin, viewsets.GenericViewSet
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-class CreateCheckoutSession(APIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = PaymentSerializer
-
-    def post(self, request, *args, **kwargs):
-        borrowing_id = kwargs.get("borrowing_id")
-        borrowing = Borrowing.objects.get(id=borrowing_id)
-        book = Book.objects.get(id=borrowing.book_id)
-        borrowing_days = (borrowing.expected_return - borrowing.borrow_date).days
-
-        total_amount = book.daily_fee * borrowing_days
-
-        try:
-            payment = create_stripe_session(
-                borrowing, total_amount, Payment.TypeChoices.PAYMENT, request
-            )
-            return Response(
-                {"id": payment.session_id, "url": payment.session_url},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
 class PaymentSuccessTempView(APIView):
     def get(self, request):
         session_id = request.GET.get("session_id")
