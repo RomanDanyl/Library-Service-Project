@@ -8,9 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from books.models import Book
 from borrowing.models import Borrowing
-from utils.stripe_helpers import create_stripe_session
 from payment.models import Payment
 from payment.serializers import PaymentSerializer
 
