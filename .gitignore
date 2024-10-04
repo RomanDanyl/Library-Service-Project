@@ -2,3 +2,4 @@ venv
 **__pycahe__
 .idea
 db.sqlite3
+.env

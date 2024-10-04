@@ -5,7 +5,7 @@ from django.dispatch import receiver
 
 from books.models import Book
 from utils.telegram_helpers import send_telegram_message
-from .models import Borrowing
+from borrowing.models import Borrowing
 
 
 @receiver(post_save, sender=Borrowing)
