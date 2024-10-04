@@ -7,8 +7,8 @@ class Borrowing(models.Model):
     borrow_date = models.DateField(auto_now_add=True)
     expected_return = models.DateField()
     actual_return = models.DateField(null=True, blank=True)
-    book_id = models.IntegerField(validators=[MinValueValidator(0)])
-    user_id = models.IntegerField(validators=[MinValueValidator(0)])
+    book_id = models.PositiveIntegerField()
+    user_id = models.PositiveIntegerField()
 
     def is_late(self) -> bool:
         if self.actual_return and self.actual_return > self.expected_return:
