@@ -5,8 +5,8 @@ from django.conf import settings
 from django.urls import reverse
 
 from books.models import Book
-from borrowing.models import Borrowing
-from payment.models import Payment
+from borrowings.models import Borrowing
+from payments.models import Payment
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -39,7 +39,7 @@ def create_stripe_session(
         mode="payment",
         success_url=request.build_absolute_uri(reverse("payments:checkout-success"))
         + f"?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=request.build_absolute_uri(reverse("payments:payment-cancel")),
+        cancel_url=request.build_absolute_uri(reverse("payments:payments-cancel")),
     )
 
     payment = Payment.objects.create(

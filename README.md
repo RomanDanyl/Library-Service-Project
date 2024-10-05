@@ -11,13 +11,14 @@ Library Service API is a Django-based web application for managing book borrowin
 - **Telegram notifications**: Alerts for overdue borrowings, creating new borrowing
 - **Stripe payments**: Secure online payments for borrowings.
 - **Asynchronous task handling**: Celery is used for background tasks (sending notifications for borrowing overdue).
+- **Dockerized Environment**: The project is fully dockerized for easy deployment and development.
 - **Redis**: Redis is used as a message broker, running in a Docker container.
 
 ## Installation
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) (for Redis)
+- [Docker](https://docs.docker.com/get-docker/)
 - [Python 3.9+](https://www.python.org/downloads/)
 
 ### Getting Started
@@ -28,48 +29,20 @@ Library Service API is a Django-based web application for managing book borrowin
    git clone https://github.com/RomanDanyl/Library-Service-Project.git
    cd library-service
 
-2. **Install dependencies:**
+2. **Build and run docker containers:**
    ```bash
-    pip install -r requirements.txt
+    docker-compose build
+    docker-compose up
     ```
 
-3. **Run Redis in Docker**:
-
-    ```bash
-    docker run -d --name redis -p 6379:6379 redis:latest
-    ```
-
-4. **Run database migrations**:
-
-    ```bash
-    python manage.py migrate
-    ```
-
-5. **Create a superuser**:
+3. **Create a superuser**:
 
     ```bash
     python manage.py createsuperuser
    ```
- 
-6. **Start the development server**:
 
-    ```bash
-    python manage.py runserver
-    ```  
-
-7. **Start the Celery worker**:
-
-    ```bash
-    celery -A library worker --loglevel=info
-    ```
-
-8. **Start the Celery beat**:
-
-    ```bash
-    celery -A library beat --loglevel=info
-    ```
 ### Usage
 
-- **Register a user**: Use the `/api/user/register/` endpoint to register a new user.
-- **Obtain tokens**: Use `/api/user/token/` to get access and refresh tokens.
+- **Register a user**: Use the `/api/users/register/` endpoint to register a new user.
+- **Obtain tokens**: Use `/api/users/token/` to get access and refresh tokens.
 - **Authenticated requests**: Include the access token in the header of your HTTP requests for authentication. Use the key "Authorize"

@@ -1,0 +1,62 @@
+services:
+  library:
+    build:
+      context: .
+    env_file:
+      - .env
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./:/app
+    command:
+      sh -c "python manage.py wait_for_db &&
+            python manage.py migrate &&
+            python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - db
+
+
+  db:
+    image: postgres:16.0-alpine3.17
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - my_db:$PGDATA
+
+
+  celery:
+    build:
+      context: .
+    env_file:
+      - .env
+    command: celery -A Library_Service_Project worker --loglevel=info
+    depends_on:
+      - library
+      - db
+
+
+  celery_beat:
+    build:
+      context: .
+    env_file:
+      - .env
+    command: celery -A Library_Service_Project beat --loglevel=info --schedule=/app/celerybeat-schedule.db
+    user: root
+    volumes:
+      - ./celerybeat-schedule:/app/celerybeat-schedule
+    depends_on:
+      - celery
+      - library
+      - db
+
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  my_db:

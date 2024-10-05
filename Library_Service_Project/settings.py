@@ -48,9 +48,10 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_celery_beat",
     "books",
-    "borrowing",
-    "payment",
-    "user",
+    "borrowings",
+    "payments",
+    "users",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
@@ -89,8 +90,12 @@ WSGI_APPLICATION = "Library_Service_Project.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT"),
     }
 }
 
@@ -136,7 +141,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "user.User"
+AUTH_USER_MODEL = "users.User"
+
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
@@ -153,10 +159,12 @@ SIMPLE_JWT = {
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZE",
 }
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERYBEAT_SCHEDULE_FILENAME = BASE_DIR / "celerybeat-schedule"
+CELERY_BEAT_SCHEDULE_FILENAME = str(CELERYBEAT_SCHEDULE_FILENAME)
 CELERY_BEAT_SCHEDULE = {
     "check-overdue-borrowings-every-day": {
-        "task": "borrowing.tasks.check_overdue_borrowings",
+        "task": "borrowings.tasks.check_overdue_borrowings",
         "schedule": crontab(hour="0", minute="0"),
     },
 }
@@ -167,7 +175,7 @@ STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Library Service API",
-    "DESCRIPTION": "Service for library borrowing",
+    "DESCRIPTION": "Service for library borrowings",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_SETTINGS": {
